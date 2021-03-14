@@ -13,7 +13,7 @@ exports.getUser = async function (id, auth) {
             return result[0][0]; // I want to learn a better way to use promises than this
         });
     if (!result) {
-        throwError('Not found', 400);
+        throw createError('Not found', 400);
     }
     if (result.auth_token != auth) {
         delete result['email'];
@@ -24,19 +24,14 @@ exports.getUser = async function (id, auth) {
 
 exports.registerUser = async function (user) {
     // Validation
-    const emailQuery = "SELECT * from user where email = '" + user.email + "'";
-    emailResult = await db
-        .getPool()
-        .query(emailQuery)
-        .then((emailResult) => {
-            return emailResult[0];
-        });
-    if (user.password == '') {
-        throwError('Password cannot be empty', 400);
-    } else if (emailResult.length != 0) {
-        throwError('Email already in use', 400);
+    emailResult = await getEmailQuery(user.email);
+    if (emailResult.length != 0) {
+        throw createError('Email already in use', 400);
     } else if (!user.email.includes('@')) {
-        throwError('Invalid email address', 400);
+        throw createError('Invalid email address', 400);
+    }
+    if (user.password == '') {
+        throw createError('Password cannot be empty', 400);
     }
 
     // Saving the user
@@ -63,7 +58,7 @@ exports.loginUser = async function (user) {
         });
     bcrypt.compare(user.password, result.password, function (err, result) {
         if (!result) {
-            throwError('Invalid username/password combination', 400);
+            throw createError('Invalid username/password combination', 400);
         }
     });
 
@@ -90,13 +85,14 @@ exports.logoutUser = async function (auth) {
         });
 
     if (affectedRows == 0) {
-        throwError('Unauthorized', 401);
+        throw createError('Unauthorized', 401);
     }
 };
 
 exports.editUser = async function (id, newUser, auth) {
+    // Check auth, id
     if (!auth) {
-        throwError('Unauthorized', 401);
+        throw createError('Unauthorized', 401);
     }
     const sql = "SELECT * FROM user where id ='" + id + "'";
     currentUser = await db
@@ -106,40 +102,86 @@ exports.editUser = async function (id, newUser, auth) {
             return result[0][0];
         });
     if (!currentUser) {
-        throwError('Not found', 404);
+        throw createError('Not found', 404);
     } else if (currentUser.auth_token != auth) {
-        throwError('Forbidden', 403);
+        throw createError('Forbidden', 403);
     }
 
-    // Validate newUser email
+    // Validate newUser email, password
     if (newUser.email) {
-        if (!newUser.email.includes('@')) {
-            throwError('Invalid email address', 400);
-        }
-        const emailSql =
-            "SELECT * FROM user where email ='" + newUser.email + "'";
-        emailResult = await db
-            .getPool()
-            .query(emailSql)
-            .then((result) => {
-                return result[0];
-            });
+        emailResult = await getEmailQuery(newUser.email).then((result) => {
+            return result;
+        });
         if (emailResult.length != 0) {
-            throwError('Email address in use', 400);
+            throw createError('Email already in use', 400);
+        } else if (!newUser.email.includes('@')) {
+            throw createError('Invalid email address', 400);
         }
     }
-
-    console.log('Current user before merge:', currentUser);
+    if (newUser.password) {
+        try {
+            await checkEditPasswords(currentUser, newUser).then((result) => {
+                return result;
+            });
+            newUser.password = await bcrypt
+                .hash(newUser.password, 10)
+                .then((result) => {
+                    return result;
+                });
+            delete newUser['currentPassword'];
+        } catch (err) {
+            throw err;
+        }
+    }
     currentUser = Object.assign(currentUser, newUser);
-    console.log('Current user after merge:', currentUser);
 
-    // TODO: add functions for checking email/password, etc.
-    // TODO: save to database
-    return;
+    // Save to database
+    saveSql =
+        "UPDATE user SET email = '" +
+        currentUser.email +
+        "', first_name = '" +
+        currentUser.first_name +
+        "', last_name = '" +
+        currentUser.last_name +
+        "', image_filename = '" +
+        currentUser.image_filename +
+        "', password = '" +
+        currentUser.password +
+        "' WHERE id = '" +
+        currentUser.id +
+        "'";
+    db.getPool().query(saveSql);
 };
 
-function throwError(message, code) {
+function createError(message, code) {
     const error = new Error(message);
     error.code = code;
-    throw error;
+    return error;
+}
+
+async function getEmailQuery(email) {
+    const emailQuery = "SELECT * from user where email = '" + email + "'";
+    emailResult = await db
+        .getPool()
+        .query(emailQuery)
+        .then((emailResult) => {
+            return emailResult[0];
+        });
+    return emailResult;
+}
+
+async function checkEditPasswords(currentUser, newUser) {
+    if (currentUser.password == '') {
+        throw createError('Password cannot be null', 400);
+    }
+    if (!newUser.currentPassword) {
+        throw createError('Invalid password', 400);
+    }
+    return await bcrypt
+        .compare(newUser.currentPassword, currentUser.password)
+        .then((result) => {
+            if (!result) {
+                throw createError('Invalid password', 400);
+            }
+        });
 }

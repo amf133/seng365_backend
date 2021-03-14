@@ -79,6 +79,8 @@ exports.editUser = async function (req, res) {
         console.log('Error:', err.message);
         if (err.code == 401) {
             res.status(401).send();
+        } else if (err.code == 400) {
+            res.status(400).send();
         }
         res.statusMessage = 'Internal Server Error';
         res.status(500).send();
