@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { allowCrossOriginRequestsMiddleware } = require('../app/middleware/cors.middleware');
-
+const {
+    allowCrossOriginRequestsMiddleware,
+} = require('../app/middleware/cors.middleware');
 
 module.exports = function () {
     // INITIALISE EXPRESS //
@@ -11,7 +12,7 @@ module.exports = function () {
     // MIDDLEWARE
     app.use(allowCrossOriginRequestsMiddleware);
     app.use(bodyParser.json());
-    app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
+    app.use(bodyParser.raw({ type: 'text/plain' })); // for the /executeSql endpoint
 
     // DEBUG (you can remove these)
     app.use((req, res, next) => {
@@ -20,10 +21,11 @@ module.exports = function () {
     });
 
     app.get('/', function (req, res) {
-        res.send({ 'message': 'Hello World!' })
+        res.send({ message: 'Hello World!' });
     });
 
     // ROUTES
+    require('../app/routes/users.routes')(app);
     require('../app/routes/backdoor.routes')(app);
 
     return app;

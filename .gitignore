@@ -30,3 +30,4 @@ typings/
 # For event site
 storage/images/*
 !storage/images/.gitkeep
+package-lock.json
