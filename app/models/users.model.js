@@ -1,6 +1,7 @@
 const db = require('../../config/db');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
+const password = require('./password');
 
 exports.getUser = async function (id, auth) {
     const sql =
@@ -35,7 +36,7 @@ exports.registerUser = async function (user) {
     }
 
     // Saving the user
-    user.password = await bcrypt.hash(user.password, 10);
+    user.password = await password.hash(user.password);
     const sql =
         'INSERT INTO `user` (`first_name`, `last_name`, `email`, `password`) VALUES (?)';
     result = await db
@@ -55,7 +56,10 @@ exports.loginUser = async function (user) {
         .query(sql)
         .then((result) => {
             return result[0][0];
-        });
+    });
+    if (!result) {
+        throw createError('No user found', 400);
+    }
     bcrypt.compare(user.password, result.password, function (err, result) {
         if (!result) {
             throw createError('Invalid username/password combination', 400);
@@ -123,8 +127,8 @@ exports.editUser = async function (id, newUser, auth) {
             await checkEditPasswords(currentUser, newUser).then((result) => {
                 return result;
             });
-            newUser.password = await bcrypt
-                .hash(newUser.password, 10)
+            newUser.password = await password
+                .hash(newUser.password)
                 .then((result) => {
                     return result;
                 });
