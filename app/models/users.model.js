@@ -1,7 +1,7 @@
 const db = require('../../config/db');
-const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const password = require('./password');
+const createError = require('./error').createError;
 
 exports.getUser = async function (id, auth) {
     const sql =
@@ -56,15 +56,15 @@ exports.loginUser = async function (user) {
         .query(sql)
         .then((result) => {
             return result[0][0];
-    });
+        });
     if (!result) {
         throw createError('No user found', 400);
     }
-    bcrypt.compare(user.password, result.password, function (err, result) {
-        if (!result) {
-            throw createError('Invalid username/password combination', 400);
-        }
-    });
+    try {
+        await password.compare(user.password, result.password);
+    } catch (err) {
+        throw err;
+    }
 
     // Generating and saving token
     token = uuidv4();
@@ -157,12 +157,6 @@ exports.editUser = async function (id, newUser, auth) {
     db.getPool().query(saveSql);
 };
 
-function createError(message, code) {
-    const error = new Error(message);
-    error.code = code;
-    return error;
-}
-
 async function getEmailQuery(email) {
     const emailQuery = "SELECT * from user where email = '" + email + "'";
     emailResult = await db
@@ -181,11 +175,9 @@ async function checkEditPasswords(currentUser, newUser) {
     if (!newUser.currentPassword) {
         throw createError('Invalid password', 400);
     }
-    return await bcrypt
-        .compare(newUser.currentPassword, currentUser.password)
-        .then((result) => {
-            if (!result) {
-                throw createError('Invalid password', 400);
-            }
-        });
+    try {
+        await password.compare(newUser.currentPassword, currentUser.password);
+    } catch (err) {
+        throw err;
+    }
 }
