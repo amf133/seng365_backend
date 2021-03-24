@@ -1,6 +1,8 @@
 const Events = require('../controllers/events.controller');
 
 module.exports = function (app) {
+    app.route(app.rootUrl + '/events/categories').get(Events.getEventCategories);
+    
     app.route(app.rootUrl + '/events').get(Events.getEvents);
 
     app.route(app.rootUrl + '/events').post(Events.addEvent);
@@ -11,5 +13,5 @@ module.exports = function (app) {
 
     app.route(app.rootUrl + '/events/:id').delete(Events.deleteEvent);
 
-    app.route(app.rootUrl + '/events/categories').get(Events.getEventCategories);
+    
 };

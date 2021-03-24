@@ -57,7 +57,8 @@ exports.editEvent = async function (req, res) {
     try {
         auth = req.headers['x-authorization'];
         newEvent = req.body;
-        await Events.editEvent(auth, newEvent);
+        eventId = req.params.id;
+        await Events.editEvent(auth, eventId, newEvent);
         res.statusMessage = 'Ok';
         res.status(200).send();
     } catch (err) {
