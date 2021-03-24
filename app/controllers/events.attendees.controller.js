@@ -26,7 +26,9 @@ exports.requestEventAttendance = async function (req, res) {
         res.status(201).send();
     } catch (err) {
         console.log('Error:', err.message);
-        if (err.code == 401) {
+        if (err.code == 400) {
+            res.status(400).send();
+        } else if (err.code == 401) {
             res.status(401).send();
         } else if (err.code == 403) {
             res.status(403).send();
@@ -47,7 +49,9 @@ exports.removeEventAttendee = async function (req, res) {
         res.status(201).send();
     } catch (err) {
         console.log('Error:', err.message);
-        if (err.code == 401) {
+        if (err.code == 400) {
+            res.status(400).send();
+        } else if (err.code == 401) {
             res.status(401).send();
         } else if (err.code == 403) {
             res.status(403).send();
