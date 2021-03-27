@@ -72,7 +72,16 @@ exports.addEvent = async function (auth, newEvent) {
         createSQL += "`" + key + "`, "
     }
     createSQL = createSQL.slice(0, -2, ) + ") VALUES (?)";
-    const createdEvent = await db.getPool().query(createSQL, [Object.values(newEvent)]);
+   
+    try {
+        var createdEvent = await db.getPool().query(createSQL, [Object.values(newEvent)]);
+    } catch(err) {
+        if (err.errno == 1062) {
+            throw createError('Event already exists!', 400);
+        }
+        throw createError('Bad Request', 400);
+    }
+    
     const createdEventId = createdEvent[0].insertId
 
     for (var i=0; i < categoryIds.length; i++) {

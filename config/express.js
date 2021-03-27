@@ -29,6 +29,7 @@ module.exports = function () {
     require('../app/routes/backdoor.routes')(app);
     require('../app/routes/events.routes')(app);
     require('../app/routes/events.attendees.routes')(app);
+    require('../app/routes/events.images.routes')(app);
 
     return app;
 };
