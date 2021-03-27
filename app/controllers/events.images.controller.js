@@ -24,14 +24,16 @@ exports.getEventImage = async function (req, res) {
 
 exports.setEventImage = async function (req, res) {
     try {
-        eventId = req.params.id
-        auth = req.headers['x-authorization'];
-        
-        console.log('body',req.body);
-
-        result = await EventsImages.setEventImage(eventId, auth, req.body);
-        // If replaced image, return 200, if created image, return 201
-        res.statusMessage = 'Created';
+        const eventId = req.params.id
+        const auth = req.headers['x-authorization'];
+        const image = req.body;
+        const contentType = req.headers['content-type'];
+        result = await EventsImages.setEventImage(eventId, auth, image, contentType);
+        if (result == "Ok") {
+            res.statusMessage = result;
+            res.status(200).send();
+        }
+        res.statusMessage = result;
         res.status(201).send();
     } catch (err) {
         console.log('Error:', err.message);

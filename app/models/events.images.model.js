@@ -27,17 +27,39 @@ exports.getEventImage = async function (eventId) {
     return [data, extension];
 };
 
-exports.setEventImage = async function (eventId, auth, image) {
-    // make sure user is event organizer
-    const query = "SELECT E.image_filename FROM user U join event E on U.id = E.organizer_id WHERE U.auth_token = '" + auth + "'";
-    result = await db.getPool().query(query);
-    console.log(result[0][0].image_filename);
-    if (result[0][0].image_filename) {
-        // Image already exists: override current
+exports.setEventImage = async function (eventId, auth, image, contentType) {
+    // Error checking
+    if (!auth) {
+        throw createError('Unorthorized', 401);
     }
-    
+    if (!contentType || !image || !eventId) {
+        throw createError('Bad Request', 400);
+    }
+    const query = "SELECT E.image_filename, U.auth_token FROM user U join event E on U.id = E.organizer_id WHERE E.id = " + eventId;
+    result = await db.getPool().query(query);
+    if (!result[0][0]) {
+        throw createError('Not Found', 404);
+    }
+    if (auth != result[0][0].auth_token) {
+        throw createError('Forbidden', 403);
+    }
+    var extension = "gif";
+    if (contentType == "image/png") {
+        extension = "png";
+    } else if (contentType == "image/jpeg") {
+        extension = "jpg";
+    }
+    var returnStatus = "Ok";
 
+    if (!result[0][0].image_filename) {
+        returnStatus = "Created";
+    } else {
+        fs.rmSync(`./storage/images/${result[0][0].image_filename}`);
+    }
 
-    return "Created";
-    // Or return "Updated"
+    const newImageName = `event_${eventId}.${extension}`;
+    const imageNameQuery = "UPDATE event SET image_filename = '" + newImageName + "' WHERE id = " + eventId;
+    db.getPool().query(imageNameQuery);
+    fs.writeFileSync(`./storage/images/${newImageName}`, image);
+    return returnStatus;
 };
