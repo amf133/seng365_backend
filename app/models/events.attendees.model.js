@@ -40,7 +40,7 @@ exports.requestEventAttendance = async function (eventId, auth) {
     attendeeQuery = "SELECT * FROM event_attendees A WHERE A.event_id = '" + eventId + "' AND user_id = " + userId;
     var preAttendee = await db.getPool().query(attendeeQuery);
     if (preAttendee[0][0]) {
-        throw createError('Already on event list', 400);
+        throw createError('Already on event list', 403);
     }
     resultQuery = "INSERT INTO `event_attendees` (`event_id`, `user_id`, `attendance_status_id`, `date_of_interest`) VALUES (" + eventId + ", " + userId + ", " + 2 + ", '" + new Date().toISOString().slice(0, 19).replace('T', ' ') + "')";
     result = await db.getPool().query(resultQuery);
