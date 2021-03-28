@@ -60,10 +60,9 @@ exports.loginUser = async function (user) {
     if (!result) {
         throw createError('No user found', 400);
     }
-    try {
-        await password.compare(user.password, result.password);
-    } catch (err) {
-        throw err;
+
+    if (!password.compare(user.password, result.password)) {
+        throw createError('Invalid username/password combination', 400);
     }
 
     // Generating and saving token
@@ -175,9 +174,7 @@ async function checkEditPasswords(currentUser, newUser) {
     if (!newUser.currentPassword) {
         throw createError('Invalid password', 400);
     }
-    try {
-        await password.compare(newUser.currentPassword, currentUser.password);
-    } catch (err) {
-        throw err;
+    if (!password.compare(newUser.currentPassword, currentUser.password)) {
+        throw createError('Invalid username/password combination', 400);
     }
 }
