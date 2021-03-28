@@ -46,7 +46,7 @@ exports.removeEventAttendee = async function (req, res) {
         auth = req.headers['x-authorization'];
         await EventsAttendees.removeEventAttendee(id, auth);
         res.statusMessage = 'Ok';
-        res.status(201).send();
+        res.status(200).send();
     } catch (err) {
         console.log('Error:', err.message);
         if (err.code == 400) {
