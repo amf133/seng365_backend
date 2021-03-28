@@ -38,7 +38,7 @@ exports.getEvents = async function (details) {
     // Sending request to DB
     const queryString = 'SELECT event_id as eventId, title, date, attendees as numAcceptedAttendees, U.first_name AS organizerFirstName, U.last_name AS organizerLastName, capacity FROM (SELECT EA.event_id, count(*) AS attendees FROM event_attendees EA GROUP BY EA.event_id) N join event E on E.id = N.event_id join user U on U.id = E.organizer_id WHERE ' + q + categoryIds + organizerId + " ORDER BY " + sortBy + count + startIndex;
     var result = await db.getPool().query(queryString);
-    if (!result[0]) {
+    if (!result[0][0]) {
         throw createError('No results', 400);
     }
 
