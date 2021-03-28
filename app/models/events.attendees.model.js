@@ -2,7 +2,12 @@ const db = require('../../config/db');
 const createError = require('./error').createError;
 
 exports.getEventAttendees = async function (eventId, auth) {
-    if (auth && await isUserAdminOfEvent(eventId, auth)) {
+    try {
+        userAuth = await isUserAdminOfEvent(eventId, auth);
+    } catch (err) {
+        throw createError('Not found', 404);
+    }
+    if (auth && userAuth) {
         var query = "SELECT U.id AS attendeeId, S.name AS status, U.first_name AS firstName, U.last_name AS lastName, A.date_of_interest AS dateOfInterest FROM event_attendees A join user U on A.user_id = U.id join attendance_status S on S.id = A.attendance_status_id WHERE event_id = " + eventId + " ORDER BY A.date_of_interest ASC";
     } else {
         const whereString = auth ? " OR U.auth_token = '" + auth + "'" : "";
