@@ -14,8 +14,9 @@ exports.getUser = async function (id, auth) {
             return result[0][0]; // I want to learn a better way to use promises than this
         });
     if (!result) {
-        throw createError('Not found', 400);
+        throw createError('Not found', 404);
     }
+    console.log(auth, result.auth_token);
     if (result.auth_token != auth) {
         delete result['email'];
     }

@@ -9,9 +9,7 @@ exports.getUser = async function (req, res) {
         res.status(200).send(result);
     } catch (err) {
         console.log('Error:', err.message);
-        if (err.code == 400) {
-            res.status(400).send();
-        } else if (err.code == 404) {
+        if (err.code == 404) {
             res.status(404).send();
         }
         res.statusMessage = 'Internal Server Error';
