@@ -30,7 +30,7 @@ exports.requestEventAttendance = async function (eventId, auth) {
     // Ensure event is in past and that there is an event with the given id
     dateQuery = "SELECT E.date FROM event E join event_attendees A on E.id = A.event_id where E.id = " + eventId;
     var preDate = await db.getPool().query(dateQuery);
-    if (!preDate[0][0].date) {
+    if (!preDate[0][0]) {
         throw createError('No event found', 404);
     }
     if (new Date(preDate[0][0].date).getTime() <= new Date().getTime()) {
