@@ -56,7 +56,7 @@ exports.removeEventAttendee = async function (eventId, auth) {
     checkQuery = "SELECT * FROM event_attendees A join event E on E.id = A.event_id WHERE A.user_id = " + userId + " AND E.id = " + eventId + " AND E.date > CURRENT_DATE AND A.attendance_status_id <> 3";
     check = await db.getPool().query(checkQuery);
     if (!check[0][0]) {
-        throw createError('Bad Request', 400);
+        throw createError('Bad Request', 403);
     }
     resultQuery = "DELETE FROM event_attendees WHERE user_id = " + userId + " AND event_id = " + eventId;
     db.getPool().query(resultQuery);
@@ -100,7 +100,7 @@ async function authAndGetUserId(auth) {
     }
     var userId = await db.getPool().query("SELECT id FROM user WHERE auth_token = '" + auth + "'");
     if (!userId[0][0]) {
-        throw createError('Forbidden', 403);
+        throw createError('Forbidden', 401);
     }
     return userId[0][0].id;
 }
