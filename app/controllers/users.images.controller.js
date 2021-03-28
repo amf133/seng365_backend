@@ -1,9 +1,9 @@
-const EventsImages = require('../models/events.images.model');
+const UsersImages = require('../models/users.images.model');
 
 exports.getUserImage = async function (req, res) {
     try {
         const userId = req.params.id;
-        const result = await EventsImages.getUserImage(userId);
+        const result = await UsersImages.getUserImage(userId);
         res.statusMessage = 'OK';
         res.setHeader("Content-Type", "image/gif");
         if (result[1] == '.jpg') {
@@ -28,7 +28,7 @@ exports.setUserImage = async function (req, res) {
         const auth = req.headers['x-authorization'];
         const image = req.body;
         const contentType = req.headers['content-type'];
-        const result = await EventsImages.setUserImage(userId, auth, image, contentType);
+        const result = await UsersImages.setUserImage(userId, auth, image, contentType);
         if (result == "Ok") {
             res.statusMessage = result;
             res.status(200).send();
@@ -53,22 +53,14 @@ exports.setUserImage = async function (req, res) {
 
 exports.deleteUserImage = async function (req, res) {
     try {
-        const eventId = req.params.id
+        const userId = req.params.id
         const auth = req.headers['x-authorization'];
-        const image = req.body;
-        const contentType = req.headers['content-type'];
-        result = await EventsImages.deleteUserImage(eventId, auth, image, contentType);
-        if (result == "Ok") {
-            res.statusMessage = result;
-            res.status(200).send();
-        }
-        res.statusMessage = result;
-        res.status(201).send();
+        await UsersImages.deleteUserImage(userId, auth);
+        res.statusMessage = "Ok";
+        res.status(200).send();
     } catch (err) {
         console.log('Error:', err.message);
-        if (err.code == 400) {
-            res.status(400).send();
-        } else if (err.code == 401) {
+        if (err.code == 401) {
             res.status(401).send();
         } else if (err.code == 403) {
             res.status(403).send();

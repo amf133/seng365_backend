@@ -5,5 +5,5 @@ module.exports = function (app) {
     
     app.route(app.rootUrl + '/users/:id/image').put(UsersImages.setUserImage);
 
-    app.route(app.rootUrl + '/users/:id/image').put(UsersImages.deleteUserImage);
+    app.route(app.rootUrl + '/users/:id/image').delete(UsersImages.deleteUserImage);
 };
