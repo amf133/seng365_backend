@@ -60,6 +60,11 @@ exports.setEventImage = async function (eventId, auth, image, contentType) {
     const newImageName = `event_${eventId}.${extension}`;
     const imageNameQuery = "UPDATE event SET image_filename = '" + newImageName + "' WHERE id = " + eventId;
     db.getPool().query(imageNameQuery);
-    fs.writeFileSync(`./storage/images/${newImageName}`, image);
+    try {
+        fs.writeFileSync(`./storage/images/${newImageName}`, image);
+    } catch (err) {
+        throw createError('Bad Request', 400); // failed if not image
+    }
+    
     return returnStatus;
 };

@@ -60,7 +60,11 @@ exports.setUserImage = async function (userId, auth, image, contentType) {
     const newImageName = `user_${userId}.${extension}`;
     const imageNameQuery = "UPDATE user SET image_filename = '" + newImageName + "' WHERE id = " + userId;
     db.getPool().query(imageNameQuery);
-    fs.writeFileSync(`./storage/images/${newImageName}`, image);
+    try {
+        fs.writeFileSync(`./storage/images/${newImageName}`, image);
+    } catch (err) {
+        throw createError('Bad Request', 400); // failed if not image
+    }
     return returnStatus;
 };
 
