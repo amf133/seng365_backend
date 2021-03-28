@@ -5,7 +5,7 @@ const createError = require('./error').createError;
 
 exports.getUser = async function (id, auth) {
     const sql =
-        'SELECT first_name, last_name, email, auth_token FROM user WHERE id = ' +
+        'SELECT first_name AS firstName, last_name AS lastName, email, auth_token FROM user WHERE id = ' +
         id;
     result = await db
         .getPool()
