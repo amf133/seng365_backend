@@ -17,7 +17,7 @@ exports.getUser = async function (id, auth) {
         throw createError('Not found', 404);
     }
     console.log(auth, result.auth_token);
-    if (result.auth_token != auth) {
+    if (!auth || !result.auth_token || result.auth_token != auth) {
         delete result['email'];
     }
     delete result['auth_token'];
