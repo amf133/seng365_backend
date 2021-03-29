@@ -6,7 +6,7 @@ exports.getEvents = async function (details) {
     const startIndex = details.startIndex ? " OFFSET " + (details.startIndex) : " ";
     const count = details.count ? " LIMIT " + details.count : " LIMIT 100";
     const q = details.q ? "(title LIKE '%" + details.q + "%' OR description LIKE '%" + details.q + "%')" : "1";
-    const categoryIds = details.categoryIds ? " AND E.id in (SELECT event_id from event_category where category_id IN (" + details.categoryIds.replace("[", "").replace("]", "") + "))" : "";
+    const categoryIds = details.categoryIds ? " AND E.id in (SELECT event_id from event_category where category_id IN (" + details.categoryIds + "))" : "";
     const organizerId = details.organizerId ? " AND organizer_id = " + details.organizerId : "";
     const sortMapping = {
         ALPHABETICAL_ASC: "title ASC",
@@ -23,9 +23,8 @@ exports.getEvents = async function (details) {
 
     //checking if given categories actually exist. This is so inefficient, I know
     if (details.categoryIds) {
-        categoryIdsCheck = details.categoryIds.replace("[", "").replace("]", "").split(",");
-        for (var i = 0; i<categoryIdsCheck.length; i++) {
-            var categoryCheckString = "SELECT * from category WHERE id = " + categoryIdsCheck[i].trim();
+        for (var i = 0; i<details.categoryIds.length; i++) {
+            var categoryCheckString = "SELECT * from category WHERE id = " + details.categoryIds[i].trim();
             var eventCategoriesCheck = await db.getPool().query(categoryCheckString);
             if (!eventCategoriesCheck[0][0]) {
                 throw createError('Bad Request', 400);
