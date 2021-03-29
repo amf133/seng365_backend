@@ -6,7 +6,7 @@ exports.getEvents = async function (details) {
     const startIndex = details.startIndex ? " OFFSET " + (details.startIndex - 1) : " ";
     const count = details.count ? " LIMIT " + details.count : " LIMIT 100";
     const q = details.q ? "(title LIKE '%" + details.q + "%' OR description LIKE '%" + details.q + "%')" : "1";
-    const categoryIds = details.categoryIds ? " AND E.id in (SELECT event_id from event_category where category_id IN (" + details.categoryIds + "))" : "";
+    const categoryIds = details.categoryIds ? " AND E.id in (SELECT event_id from event_category where category_id IN (" + details.categoryIds.replace("[", "").replace("]", "") + "))" : "";
     const organizerId = details.organizerId ? " AND organizer_id = " + details.organizerId : "";
     const sortMapping = {
         ALPHABETICAL_ASC: "title ASC",
@@ -20,10 +20,10 @@ exports.getEvents = async function (details) {
     }
     var sortBy = details.sortBy ? details.sortBy : "DATE_DESC";
     sortBy = sortMapping[sortBy];
-    
+
     //checking if given categories actually exist. This is so inefficient, I know
     if (details.categoryIds) {
-        categoryIdsCheck = details.categoryIds.split(",");
+        categoryIdsCheck = details.categoryIds.replace("[", "").replace("]", "").split(",");
         for (var i = 0; i<categoryIdsCheck.length; i++) {
             var categoryCheckString = "SELECT * from category WHERE id = " + categoryIdsCheck[i].trim();
             var eventCategoriesCheck = await db.getPool().query(categoryCheckString);
