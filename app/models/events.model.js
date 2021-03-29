@@ -3,7 +3,7 @@ const createError = require('./error').createError;
 
 exports.getEvents = async function (details) {
     // Setting vars depending on the passed in params
-    const startIndex = details.startIndex ? " OFFSET " + (details.startIndex - 1) : " ";
+    const startIndex = details.startIndex ? " OFFSET " + (details.startIndex) : " ";
     const count = details.count ? " LIMIT " + details.count : " LIMIT 100";
     const q = details.q ? "(title LIKE '%" + details.q + "%' OR description LIKE '%" + details.q + "%')" : "1";
     const categoryIds = details.categoryIds ? " AND E.id in (SELECT event_id from event_category where category_id IN (" + details.categoryIds.replace("[", "").replace("]", "") + "))" : "";
