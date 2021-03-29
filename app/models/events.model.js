@@ -56,7 +56,6 @@ exports.getEvents = async function (details) {
     // Adding categories array to result
     for (x=0; x<result[0].length;x++) {
         result[0][x]["categories"] = categoriesArr[result[0][x].eventId];
-        delete result[0][x]["date"];
     }
     return result[0];
 };
