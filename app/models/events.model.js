@@ -20,15 +20,19 @@ exports.getEvents = async function (details) {
     }
     var sortBy = details.sortBy ? details.sortBy : "DATE_DESC";
     sortBy = sortMapping[sortBy];
-
     //checking if given categories actually exist. This is so inefficient, I know
-    if (details.categoryIds) {
+    if (details.categoryIds && typeof details.categoryIds == "object") {
         for (var i = 0; i<details.categoryIds.length; i++) {
-            var categoryCheckString = "SELECT * from category WHERE id = " + details.categoryIds[i].trim();
+            var categoryCheckString = "SELECT * from category WHERE id = " + details.categoryIds[i];
             var eventCategoriesCheck = await db.getPool().query(categoryCheckString);
             if (!eventCategoriesCheck[0][0]) {
                 throw createError('Bad Request', 400);
             }
+        }
+    } else if (details.categoryIds) {
+        var eventCategoriesCheck = await db.getPool().query("SELECT * from category WHERE id = " + details.categoryIds);
+        if (!eventCategoriesCheck[0][0]) {
+            throw createError('Bad Request', 400);
         }
     }
     
