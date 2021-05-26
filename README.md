@@ -59,3 +59,6 @@ Some of the Postman requests, such as POST /users/login, have scripts included, 
 ## Storing photos
 
 You should set up your application to store files in the `storage/photos` directory; this is where the photos used for the sample data are copied into when you run a `/resample` or `/reload` request. There will initially be a file called `.gitkeep` in there; this is just so that the directory gets included in the git repository (see https://stackoverflow.com/q/7229885/8355496 for more information).
+
+## Running the frontend application
+See: https://github.com/amf133/seng365_frontend
